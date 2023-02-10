@@ -9,13 +9,15 @@
 #include<regex>
 using namespace std;
 
-enum class Command { ADD, SUB, AND, OR, NEG, NOT, EQ, GT, LT, POP, PUSH, INVALID = -1 };
+enum class Command { ADD, SUB, AND, OR, NEG, NOT, EQ, GT, LT, POP, PUSH,
+        LABEL, GOTO, IF_GOTO, INVALID = -1 };
 
 enum class Segment { LOCAL, ARGUMENT, THIS, THAT, TEMP, POINTER, STATIC, CONSTANT, INVALID = -1 };
 
 // Initialize label counters.
 int jmp_id = 0;
 
+string file_name;
 
 // Command parsing
 Command command_type(string command) {
@@ -30,6 +32,9 @@ Command command_type(string command) {
     if (command.compare("or") == 0) return Command::OR;
     if (command.compare("pop") == 0) return Command::POP;
     if (command.compare("push") == 0) return Command::PUSH;
+    if (command.compare("label") == 0) return Command::LABEL;
+    if (command.compare("goto") == 0) return Command::GOTO;
+    if (command.compare("if-goto") == 0) return Command::IF_GOTO;
     return Command::INVALID;
 }
 
@@ -69,7 +74,6 @@ bool IsDigit(char i) {
 bool IsValidNumber(string str) {
     return !str.empty() && all_of(str.begin(), str.end(), IsDigit);
 }
-
 
 // Translate arithmetic command
 string parse_arithmetic(Command command_type, vector<string> &asm_commands) {
@@ -180,7 +184,7 @@ string parse_memory(Command command_type, string arguments, vector<string> &asm_
                         asm_commands.push_back("@THAT");
                     }
                     break;
-                case Segment::STATIC : asm_commands.push_back("@" + to_string(idx+16)); break;
+                case Segment::STATIC : asm_commands.push_back("@st_" + file_name + "." + to_string(idx)); break;
             }
             asm_commands.push_back("D=M");
             asm_commands.push_back("@SP");
@@ -228,7 +232,7 @@ string parse_memory(Command command_type, string arguments, vector<string> &asm_
                         asm_commands.push_back("@THAT");
                     }
                     break;
-                case Segment::STATIC : asm_commands.push_back("@" + to_string(idx+16)); break;
+                case Segment::STATIC : asm_commands.push_back("@st_" + file_name + "." + to_string(idx)); break;
             }
             asm_commands.push_back("M=D");
         }
@@ -236,6 +240,10 @@ string parse_memory(Command command_type, string arguments, vector<string> &asm_
     return string("");
 }
 
+
+string parse_flow(Command command_type, string arguments, vector<string> &asm_commands){
+    return string("Program flow not yet implemented.");
+}
 
 // Parse and identify vm command's type.
 string parse_command(string vm_command, vector<string> &asm_commands) {
@@ -277,6 +285,9 @@ int main(int argc, char** argv) {
         cout << "The input file is not an 'vm' extension file." << endl;
         return 0;
     }
+
+    file_name = vmFileName.substr(vmFileName.find_last_of("/\\") + 1);
+    file_name = file_name.substr(0, file_name.length()-3);
 
     ifstream vmFile;
     vmFile.open(vmFileName, ios::in);

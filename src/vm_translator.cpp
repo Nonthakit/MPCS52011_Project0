@@ -128,6 +128,8 @@ bool IsValidNumber(string str) {
     return !str.empty() && all_of(str.begin(), str.end(), IsDigit);
 }
 
+/////////////////////////////////////////  Parse commands /////////////////////////////////////
+
 // Translate arithmetic command
 void parse_arithmetic(Command command_type, ParseData &pdata) {
     if (command_type <= Command::OR) {
@@ -432,6 +434,8 @@ void parse_command(string vm_command, ParseData &pdata) {
     }
 }
 
+/////////////////////////////////////////  Sematic Analysis /////////////////////////////////////
+
 // Check arithmetic command syntax.
 string check_arithmetic(Command type, vector<string> args) {
     if (!args.empty()) {
@@ -648,6 +652,9 @@ bool check_file(string &vmFileName, SemeticData &sdata) {
     vmFile.close();
     return has_error;
 }
+
+
+/////////////////////////////////////////  Files management /////////////////////////////////////
 
 // Translating a file.
 void parse_file(string &vmFileName, ParseData &pdata) {
